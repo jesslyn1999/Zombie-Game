@@ -4,5 +4,5 @@ using UnityEngine;
 
 public interface IEnemy
 {
-    void TakeDamage(int damage);
+    int TakeDamage(int damage);  // return score
 }

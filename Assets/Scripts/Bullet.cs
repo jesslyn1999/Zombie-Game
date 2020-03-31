@@ -1,10 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Bullet : MonoBehaviour, IPooledObject
 {
-    [SerializeField] private LayerMask m_WhatIsColliders;
+    public NinjagirlMovement player;
 
     public float speed = 20f;
     public Rigidbody2D rb;
@@ -12,6 +13,9 @@ public class Bullet : MonoBehaviour, IPooledObject
 
     const int PLAYER_LAYER = 8;
     const int ENEMY_LAYER = 9;
+
+    public GameObject scoreTextObj;
+    private Text scoreTextBar;
 
     // Start is called before the first frame update
     void Start()
@@ -33,9 +37,16 @@ public class Bullet : MonoBehaviour, IPooledObject
                 IEnemy enemy = collision.GetComponent<IEnemy>();
                 if (enemy != null)
                 {
-                    enemy.TakeDamage(damage);
+                    int score = enemy.TakeDamage(damage);
+                    if (player != null)
+                    {
+                        player.addScore(score);
+                    }
                 }
             }
+        } else
+        {
+            player = collision.gameObject.GetComponent<NinjagirlMovement>();
         }
 
     }

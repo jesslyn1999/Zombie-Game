@@ -24,7 +24,6 @@ public class ObjectPooler : MonoBehaviour
 
 	public List<ObjectPoolItem> itemsToPool;
 
-
 	public Dictionary<string, Queue<GameObject>> pooledObjectsDict;
 
     #region Singleton
@@ -110,5 +109,6 @@ public class ObjectPooler : MonoBehaviour
 			objectPoolQueue.Enqueue(obj);
 		}
 		pooledObjectsDict.Add(item.tag, objectPoolQueue);
+
 	}
 }

@@ -16,6 +16,7 @@ public class MaleZombieMovement : MonoBehaviour, IEnemy, IPooledObject
     public int moveRight = -1;
     public int turn_count = 0;
     public int max_turn = 6;
+    public int value = 3;
 
     const int PLAYER_LAYER = 8;
     const int OBSTACLE_LAYER = 8;
@@ -65,13 +66,15 @@ public class MaleZombieMovement : MonoBehaviour, IEnemy, IPooledObject
     }
 
 
-    void IEnemy.TakeDamage(int damage)
+    int IEnemy.TakeDamage(int damage)
     {
         health -= damage;
         if (health <= 0)
         {
             Die();
+            return value;
         }
+        return 0;
     }
 
     void Die()

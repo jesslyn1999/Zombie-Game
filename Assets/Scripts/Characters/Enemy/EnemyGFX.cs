@@ -7,6 +7,7 @@ public class EnemyGFX : MonoBehaviour, IEnemy, IPooledObject
 {
     public int health = 5;
     public int damage = 1;
+    public int value = 7;
 
     public AIPath aIPath;
 
@@ -29,13 +30,15 @@ public class EnemyGFX : MonoBehaviour, IEnemy, IPooledObject
         }
     }
 
-    void IEnemy.TakeDamage(int damage)
+    int IEnemy.TakeDamage(int damage)
     {
         health -= damage;
         if (health <= 0)
         {
             Die();
+            return value;
         }
+        return 0;
     }
 
     void Die()

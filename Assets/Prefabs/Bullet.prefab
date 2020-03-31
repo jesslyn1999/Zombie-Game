@@ -143,8 +143,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e6a6a7cc62d58147a7b38b5d607f052, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_WhatIsColliders:
-    serializedVersion: 2
-    m_Bits: 55
+  player: {fileID: 0}
   speed: 20
   rb: {fileID: 1633507705}
+  damage: 5

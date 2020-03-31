@@ -1,40 +1,59 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 public class NinjagirlMovement : MonoBehaviour
 {
     public CharacterController2D controller;
     public Animator animator;
-    public float runSpeed = 40f;
+
+    public string username = "dummy";
+    public float INIT_SPEED = 40f;
+    public int INIT_HEALTH = 20;
+    public float runSpeed;
+    public int health;
+    public int score = 0;
+    public HealthBar healthBar;
+    public TextMeshProUGUI scoreTextBar;
+    public GameObject gameOverPanel;
+
+
     float horizontalMove = 0f;
     bool jump = false;
     bool crouch = false;
+    bool wasDied = false;
 
-    public int health = 50;
-
-    const string IS_IDLE = "isIdle";
-    const string IS_DEAD = "isDead";
     const string IS_JUMPING = "isJumping";
-    const string IS_JUMPING_DOWN = "isJumpingDown";
     const string IS_RUNNING = "isRunning";
     const string IS_ATTACKING = "isAttacking";
     const string IS_THROWING = "isThrowing";
     const string IS_SLIDING = "isSliding";
-
-    const float INIT_SPEED = 25f;
+    const string IS_DEAD = "isDead";
 
 
     // Start is called before the first frame update
     void Start()
     {
-        animator.SetBool("isIdle", true);
+        health = INIT_HEALTH;
+        runSpeed = INIT_SPEED;
+        healthBar.SetHealthMax(INIT_HEALTH);
+        setScoreTextBar();
+        gameOverPanel.SetActive(false);
+        username = PlayerPrefs.GetString("username");
     }
-
     // Update is called once per frame
     void Update()
     {
-        movement();
+        if (health > 0)
+            movement();
+        else
+        {
+            if (!wasDied)
+                StartCoroutine("Die");
+            wasDied = true;
+        }
     }
 
     void FixedUpdate()
@@ -48,79 +67,69 @@ public class NinjagirlMovement : MonoBehaviour
     {
         horizontalMove = Input.GetAxisRaw("Horizontal") * runSpeed;
 
-        if (Input.GetButtonDown("Jump") && controller.isGrounded())
+        if (Input.GetButtonDown("Jump"))
         {
-            stopAllAnim();
             jump = true;
             setMovementTrue(IS_JUMPING);
-            runSpeed = 0.7f * INIT_SPEED;
+            runSpeed = 0.6f * INIT_SPEED;
+        }
+
+        if (!isMovementTrue(IS_JUMPING))
+        {
+            runSpeed = INIT_SPEED;
         }
 
         if (Input.GetButtonDown("Crouch"))
         {
-            if (!isMovementTrue(IS_SLIDING))
-                stopAllAnim();
+            Debug.Log("HMMM");
             setMovementTrue(IS_SLIDING);
             crouch = true;
         }
         else if (Input.GetButtonUp("Crouch"))
         {
-            Debug.Log("is up sliding");
+            Debug.Log("YEY");
             setMovementFalse(IS_SLIDING);
             crouch = false;
         }
 
-        if (horizontalMove != 0 && isMovementTrue(IS_IDLE) && !isMovementTrue(IS_RUNNING) && !isMovementTrue(IS_SLIDING))
-        {
-            stopAllAnim();
-            setMovementTrue(IS_RUNNING);
-        } else if (horizontalMove==0)
-        {
-            setMovementFalse(IS_RUNNING);
-        }
 
-        if (!isAnyAnimActive())
-        {
-            setMovementTrue(IS_IDLE);
-        }
+        if (horizontalMove != 0)
+            setMovementTrue(IS_RUNNING);
+        
+        if (horizontalMove==0)
+            setMovementFalse(IS_RUNNING);
+
+        if (Input.GetButtonDown("Fire1"))
+            setMovementTrue(IS_THROWING);
+        else if (Input.GetButtonUp("Fire1"))
+            setMovementFalse(IS_THROWING);
+
+        if (Input.GetButtonDown("Attack"))
+            setMovementTrue(IS_ATTACKING);
+        else if (Input.GetButtonUp("Attack"))
+            setMovementFalse(IS_ATTACKING);
+    }
+
+    public void addScore(int m_score)
+    {
+        score += m_score;
+        setScoreTextBar();
+    }
+
+    private void setScoreTextBar()
+    {
+        scoreTextBar.text = "Score: " + score.ToString();
     }
 
     public void isGrounded()
     {
-        if (isMovementTrue(IS_JUMPING) && isMovementTrue(IS_JUMPING_DOWN))
-        {
-            Debug.Log("arrive");
-            stopAllAnim();
-            runSpeed = INIT_SPEED;
-        } else if (isMovementTrue(IS_JUMPING))
-        {
-            setMovementTrue(IS_JUMPING_DOWN);
-        }
-        
+       setMovementFalse(IS_JUMPING);
     }
 
-    public void onSliding(bool isSLiding)
+    public void onSliding(bool isSliding)
     {
-        animator.SetBool(IS_SLIDING, isSLiding);
-    }
-
-    void stopAllAnim()
-    {
-        setMovementFalse(IS_IDLE);
-        setMovementFalse(IS_RUNNING);
-        setMovementFalse(IS_DEAD);
-        setMovementFalse(IS_JUMPING);
-        setMovementFalse(IS_THROWING);
-        setMovementFalse(IS_SLIDING);
-        setMovementFalse(IS_ATTACKING);
-        setMovementFalse(IS_JUMPING_DOWN);
-    }
-
-    bool isAnyAnimActive()
-    {
-        return isMovementTrue(IS_IDLE)|| isMovementTrue(IS_RUNNING)|| isMovementTrue(IS_DEAD)
-            || isMovementTrue(IS_JUMPING)|| isMovementTrue(IS_THROWING)|| isMovementTrue(IS_SLIDING)
-            || isMovementTrue(IS_ATTACKING) || isMovementTrue(IS_JUMPING_DOWN);
+        Debug.Log("ON SLIDING: " + isSliding);
+        animator.SetBool(IS_SLIDING, isSliding);
     }
 
     void setMovementTrue(string movement)
@@ -141,15 +150,16 @@ public class NinjagirlMovement : MonoBehaviour
     public void TakeDamage(int damage)
     {
         health -= damage;
-        if (health <= 0)
-        {
-            Die();
-        }
+        healthBar.SetHealth(health);
     }
 
-    void Die()
+    IEnumerator Die()
     {
-        setMovementTrue(IS_DEAD);
+        _ = RestApi.PostScore(username, score);
+        animator.SetBool(IS_DEAD, true);
+        //Destroy(gameObject, 6f);
+        gameOverPanel.SetActive(true);
+        yield return new WaitForSeconds(6f);
         gameObject.SetActive(false);
     }
 }

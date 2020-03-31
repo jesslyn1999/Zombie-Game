@@ -18,6 +18,12 @@ public class NinjagirlMovement : MonoBehaviour
     public HealthBar healthBar;
     public TextMeshProUGUI scoreTextBar;
     public GameObject gameOverPanel;
+    public AudioSource runningAudio;
+    public AudioSource shootingAudio;
+    public Transform firePoint;
+    public LayerMask enemyLayers;
+    public float attackRange = 1.2f;
+    public int swordDamage = 10;
 
 
     float horizontalMove = 0f;
@@ -31,6 +37,7 @@ public class NinjagirlMovement : MonoBehaviour
     const string IS_THROWING = "isThrowing";
     const string IS_SLIDING = "isSliding";
     const string IS_DEAD = "isDead";
+
 
 
     // Start is called before the first frame update
@@ -81,33 +88,69 @@ public class NinjagirlMovement : MonoBehaviour
 
         if (Input.GetButtonDown("Crouch"))
         {
-            Debug.Log("HMMM");
             setMovementTrue(IS_SLIDING);
             crouch = true;
         }
         else if (Input.GetButtonUp("Crouch"))
         {
-            Debug.Log("YEY");
             setMovementFalse(IS_SLIDING);
             crouch = false;
         }
 
 
-        if (horizontalMove != 0)
+        if (horizontalMove != 0) {
+            runningAudio.Play();
             setMovementTrue(IS_RUNNING);
-        
-        if (horizontalMove==0)
+        }
+
+        if (horizontalMove == 0) {
+            runningAudio.Stop();
             setMovementFalse(IS_RUNNING);
+        }
 
         if (Input.GetButtonDown("Fire1"))
+        {
+            shootingAudio.Play();
             setMovementTrue(IS_THROWING);
+        }
         else if (Input.GetButtonUp("Fire1"))
+        {
+            shootingAudio.Stop();
             setMovementFalse(IS_THROWING);
+        }
 
         if (Input.GetButtonDown("Attack"))
+        {
+            shootingAudio.Play();
             setMovementTrue(IS_ATTACKING);
+            SwordAttack();
+        }
         else if (Input.GetButtonUp("Attack"))
+        {
+            shootingAudio.Stop();
             setMovementFalse(IS_ATTACKING);
+        }
+    }
+
+    private void SwordAttack()
+    {
+        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(firePoint.position, attackRange, enemyLayers);
+        foreach(Collider2D enemyCollid in hitEnemies)
+        {
+            IEnemy enemy = enemyCollid.GetComponent<IEnemy>();
+            if (enemy != null)
+            {
+                int score = enemy.TakeDamage(swordDamage);
+                addScore(score);
+                Debug.Log("YEY: " + score);
+            }
+        }
+    }
+
+    void OnDrawGizmosSelected()
+    {
+        if (firePoint == null) return;
+        Gizmos.DrawWireSphere(firePoint.position, attackRange);
     }
 
     public void addScore(int m_score)

@@ -263,3 +263,4 @@ MonoBehaviour:
   moveRight: 1
   turn_count: 0
   max_turn: 6
+  value: 3

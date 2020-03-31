@@ -10,6 +10,7 @@ public class EnemyGFX : MonoBehaviour, IEnemy, IPooledObject
     public int value = 7;
 
     public AIPath aIPath;
+    public AIDestinationSetter destinationSetter;
 
     const int PLAYER_LAYER = 8;
 
@@ -41,21 +42,23 @@ public class EnemyGFX : MonoBehaviour, IEnemy, IPooledObject
         return 0;
     }
 
+    void OnEnable()
+    {
+        health = 5;
+    }
+
     void Die()
     {
         gameObject.SetActive(false);
-        transform.parent.gameObject.SetActive(false);
     }
 
-    void OnTriggerEnter2D(Collider2D collision)
+    void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.layer == PLAYER_LAYER)
         {
-            Debug.Log("collide");
-            NinjagirlMovement player = collision.GetComponent<NinjagirlMovement>();
+            NinjagirlMovement player = collision.gameObject.GetComponent<NinjagirlMovement>();
             if (player != null)
             {
-                Debug.Log("take rest");
                 player.TakeDamage(damage);
             }
         }
@@ -64,6 +67,6 @@ public class EnemyGFX : MonoBehaviour, IEnemy, IPooledObject
 
     void IPooledObject.OnObjectSpawn()
     {
-        transform.parent.gameObject.SetActive(true);
+        destinationSetter.target = GameObject.FindWithTag("Player").transform;
     }
 }

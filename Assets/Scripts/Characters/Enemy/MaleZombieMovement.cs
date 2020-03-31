@@ -19,16 +19,16 @@ public class MaleZombieMovement : MonoBehaviour, IEnemy, IPooledObject
     public int value = 3;
 
     const int PLAYER_LAYER = 8;
-    const int OBSTACLE_LAYER = 8;
+    const int OBSTACLE_LAYER = 10;
 
     const string IS_IDLE = "isIdle";
     const string IS_DEAD = "isDead";
     const string IS_WALKING = "isWalking";
     const string IS_ATTACKING = "isAttacking";
 
-    // Start is called before the first frame update
-    void Start()
+    void OnEnable()
     {
+        health = 10;
     }
 
     // Update is called once per frame
@@ -53,6 +53,7 @@ public class MaleZombieMovement : MonoBehaviour, IEnemy, IPooledObject
 
         // only randomize 1 or -1 or 0
         horizontalMove = moveRight * runSpeed;
+        //Debug.Log("Zombie walk : " + horizontalMove + " " + moveRight + " " + runSpeed);
 
         if (horizontalMove != 0 && isMovementTrue(IS_IDLE))
         {
@@ -106,6 +107,9 @@ public class MaleZombieMovement : MonoBehaviour, IEnemy, IPooledObject
 
     void IPooledObject.OnObjectSpawn()
     {
+        moveRight = (int)transform.right.x;
+        if (moveRight < 0) controller.setFacingRight(false);
+        else controller.setFacingRight(true);
     }
 
     void stopAllAnim()

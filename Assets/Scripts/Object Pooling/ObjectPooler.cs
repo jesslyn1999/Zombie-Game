@@ -104,6 +104,11 @@ public class ObjectPooler : MonoBehaviour
 		{
 			GameObject obj = (GameObject)Instantiate(item.objectToPool);
 			obj.SetActive(false);
+			//GameObject[] children = obj.GetComponentsInChildren<GameObject>();
+			//foreach (GameObject child in children)
+			//{
+			//	child.SetActive(true);
+			//}
 			obj.transform.parent = this.transform;
 			//pooledObjects.Add(obj);
 			objectPoolQueue.Enqueue(obj);

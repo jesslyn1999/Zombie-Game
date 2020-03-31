@@ -15,7 +15,6 @@ public class Bullet : MonoBehaviour, IPooledObject
     const int ENEMY_LAYER = 9;
 
     public GameObject scoreTextObj;
-    private Text scoreTextBar;
 
     // Start is called before the first frame update
     void Start()
